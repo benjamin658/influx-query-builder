@@ -11,12 +11,23 @@ func assert(t *testing.T, q string, expected string) {
 	}
 }
 
-func TestSelect(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement"`
+func TestClean(t *testing.T) {
 	builder := New()
+	var expected = ""
+	builder.Select([]string{"temperature", "humidity"}).From("measurement").Build()
+
+	builder = builder.Clean()
+	q := builder.Build()
+	assert(t, q, expected)
+}
+
+func TestSelect(t *testing.T) {
+	builder := New()
+	var expected = `SELECT "temperature","humidity" FROM "measurement"`
 	q := builder.Select([]string{"temperature", "humidity"}).From("measurement").Build()
 
 	assert(t, q, expected)
+	builder = builder.Clean()
 }
 
 func TestSelectFunction(t *testing.T) {
@@ -28,7 +39,7 @@ func TestSelectFunction(t *testing.T) {
 }
 
 func TestWhere(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > '30'`
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > 30`
 	builder := New()
 	q := builder.Select([]string{"temperature", "humidity"}).From("measurement").Where("temperature", ">", 30).Build()
 
@@ -36,7 +47,7 @@ func TestWhere(t *testing.T) {
 }
 
 func TestAnd(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > '30' AND "humidity" < '10'`
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > 30 AND "humidity" < 10`
 	builder := New()
 	q := builder.Select([]string{"temperature", "humidity"}).From("measurement").Where("temperature", ">", 30).And("humidity", "<", 10).Build()
 
@@ -44,7 +55,7 @@ func TestAnd(t *testing.T) {
 }
 
 func TestOr(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > '30' OR "humidity" < '10'`
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > 30 OR "humidity" < 10`
 	builder := New()
 	q := builder.Select([]string{"temperature", "humidity"}).From("measurement").Where("temperature", ">", 30).Or("humidity", "<", 10).Build()
 
@@ -52,7 +63,7 @@ func TestOr(t *testing.T) {
 }
 
 func TestWhereAndOr(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > '30' AND "humidity" < '10' OR "humidity" > '20'`
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > 30 AND "humidity" < 10 OR "humidity" > 20`
 	builder := New()
 	q := builder.Select([]string{"temperature", "humidity"}).From("measurement").Where("temperature", ">", 30).And("humidity", "<", 10).Or("humidity", ">", 20).Build()
 

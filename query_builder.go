@@ -21,6 +21,7 @@ type QueryBuilder interface {
 	Desc() QueryBuilder
 	Asc() QueryBuilder
 	Build() string
+	Clean() QueryBuilder
 }
 
 type nullValue struct{}
@@ -50,6 +51,11 @@ func New() QueryBuilder {
 		limit:  -1,
 		offset: -1,
 	}
+}
+
+// Clean Clean current builder and get a new one
+func (q *query) Clean() QueryBuilder {
+	return New()
 }
 
 func (q *query) Select(fields []string) QueryBuilder {
@@ -109,15 +115,19 @@ func (q *query) Asc() QueryBuilder {
 
 func (q *query) Build() string {
 	var buffer bytes.Buffer
+	selectStmt := q.buildFields()
+	fromStmt := q.buildFrom()
 
-	buffer.WriteString(q.buildFields())
-	buffer.WriteString(q.buildFrom())
-	buffer.WriteString(q.buildWhere())
-	buffer.WriteString(q.buildGroupBy())
-	buffer.WriteString(q.buildFill())
-	buffer.WriteString(q.buildOrder())
-	buffer.WriteString(q.buildLimit())
-	buffer.WriteString(q.buildOffset())
+	if selectStmt != "" && fromStmt != "" {
+		buffer.WriteString(selectStmt)
+		buffer.WriteString(fromStmt)
+		buffer.WriteString(q.buildWhere())
+		buffer.WriteString(q.buildGroupBy())
+		buffer.WriteString(q.buildFill())
+		buffer.WriteString(q.buildOrder())
+		buffer.WriteString(q.buildLimit())
+		buffer.WriteString(q.buildOffset())
+	}
 
 	return strings.TrimSpace(buffer.String())
 }
@@ -125,6 +135,10 @@ func (q *query) Build() string {
 var functionMatcher = regexp.MustCompile(`.+\(.+\)$`)
 
 func (q *query) buildFields() string {
+	if q.fields == nil {
+		return ""
+	}
+
 	tmpl := `"%s"`
 	fields := make([]string, len(q.fields))
 
@@ -140,6 +154,10 @@ func (q *query) buildFields() string {
 }
 
 func (q *query) buildFrom() string {
+	if q.measurement == "" {
+		return ""
+	}
+
 	return fmt.Sprintf(`FROM "%s" `, q.measurement)
 }
 
@@ -152,7 +170,7 @@ func (q *query) buildWhere() string {
 		orCriteria := make([]string, 0)
 
 		buffer.WriteString("WHERE ")
-		whereCriteria = fmt.Sprintf(`"%s" %s '%s'`, q.where.key, q.where.op, q.where.value)
+		whereCriteria = fmt.Sprintf(`"%s" %s %s`, q.where.key, q.where.op, q.where.value)
 		buffer.WriteString(whereCriteria)
 		buffer.WriteString(" ")
 
@@ -161,7 +179,7 @@ func (q *query) buildWhere() string {
 			for _, tag := range q.and {
 				andCriteria = append(
 					andCriteria,
-					fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value),
+					fmt.Sprintf(`"%s" %s %s`, tag.key, tag.op, tag.value),
 				)
 			}
 			buffer.WriteString(strings.Join(andCriteria, " AND "))
@@ -173,7 +191,7 @@ func (q *query) buildWhere() string {
 			for _, tag := range q.or {
 				orCriteria = append(
 					orCriteria,
-					fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value),
+					fmt.Sprintf(`"%s" %s %s`, tag.key, tag.op, tag.value),
 				)
 			}
 			buffer.WriteString(strings.Join(orCriteria, " OR "))
