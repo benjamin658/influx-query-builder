@@ -24,8 +24,6 @@ type QueryBuilder interface {
 	Clean() QueryBuilder
 }
 
-type nullValue struct{}
-
 type tag struct {
 	key   string
 	op    string
