@@ -1,6 +1,6 @@
 # Influx Query Cursor - InfluxDB Query Builder & Cursor-Based Pagination
 
-[![Build Status](https://travis-ci.org/benjamin658/express-inject-middleware.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-cursor.svg?branch=master)
+[![Build Status](https://travis-ci.org/benjamin658/influx-query-cursor.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-cursor.svg?branch=master)
 
 > The lightweight InfluxDB query builder and cursor-based pagination implement in Go.
 
