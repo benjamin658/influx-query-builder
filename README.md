@@ -121,3 +121,10 @@ builder := New()
 // some code...
 builder = builder.Clean()
 ```
+
+License
+-------
+
+© Ben Hu (benjamin658), 2018-NOW
+
+Released under the [MIT License](https://github.com/benjamin658/influx-query-cursor/blob/master/LICENSE)
