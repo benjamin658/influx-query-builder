@@ -1,14 +1,14 @@
-# Influx Query Cursor - InfluxDB Query Builder & Cursor-Based Pagination
+# Influx Query Builder
 
-[![Build Status](https://travis-ci.org/benjamin658/influx-query-cursor.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-cursor.svg?branch=master)
+[![Build Status](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)
 
-> The lightweight InfluxDB query builder and cursor-based pagination implement in Go.
+> The super lightweight InfluxDB query builder.
 
 This project is still under active development.
 
 ## Installation
 
-`go get -u github.com/benjamin658/influx-query-cursor`
+`go get -u github.com/benjamin658/influx-query-builder`
 
 ## Query Builder Usage
 
@@ -127,4 +127,4 @@ License
 
 © Ben Hu (benjamin658), 2018-NOW
 
-Released under the [MIT License](https://github.com/benjamin658/influx-query-cursor/blob/master/LICENSE)
+Released under the [MIT License](https://github.com/benjamin658/influx-query-builder/blob/master/LICENSE)
