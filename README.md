@@ -6,6 +6,10 @@
 
 This project is still under active development.
 
+## Installation
+
+`go get -u github.com/benjamin658/influx-query-cursor`
+
 ## Query Builder Usage
 
 ### Simple query
