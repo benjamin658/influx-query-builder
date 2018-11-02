@@ -50,16 +50,16 @@ builder := New()
 query := builder.
   Select([]string{"temperature", "humidity"}).
   From("measurement").
-  Where("temperature", ">", 30).
-  And("humidity", "<", 10).
-  Or("humidity", ">", 20).
+  Where("time", ">", "2018-11-01T06:33:57.503Z").
+  And("time", "<", "2018-11-02T09:35:25Z").
+  Or("tag", "=", "t").
   Build()
 ```
 
 Output:
 
 ```sql
-SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > 30 AND "humidity" < 10 OR "humidity" > 20
+SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z' OR "tag" = 't'
 ```
 
 ### Group By time
