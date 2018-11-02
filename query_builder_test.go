@@ -1,4 +1,4 @@
-package influxqcursor
+package influxquerybuilder
 
 import (
 	"fmt"
