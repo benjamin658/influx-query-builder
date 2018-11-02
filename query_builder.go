@@ -170,7 +170,7 @@ func (q *query) buildWhere() string {
 		orCriteria := make([]string, 0)
 
 		buffer.WriteString("WHERE ")
-		whereCriteria = fmt.Sprintf(`"%s" %s %s`, q.where.key, q.where.op, q.where.value)
+		whereCriteria = fmt.Sprintf(`"%s" %s '%s'`, q.where.key, q.where.op, q.where.value)
 		buffer.WriteString(whereCriteria)
 		buffer.WriteString(" ")
 
@@ -179,7 +179,7 @@ func (q *query) buildWhere() string {
 			for _, tag := range q.and {
 				andCriteria = append(
 					andCriteria,
-					fmt.Sprintf(`"%s" %s %s`, tag.key, tag.op, tag.value),
+					fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value),
 				)
 			}
 			buffer.WriteString(strings.Join(andCriteria, " AND "))
@@ -191,7 +191,7 @@ func (q *query) buildWhere() string {
 			for _, tag := range q.or {
 				orCriteria = append(
 					orCriteria,
-					fmt.Sprintf(`"%s" %s %s`, tag.key, tag.op, tag.value),
+					fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value),
 				)
 			}
 			buffer.WriteString(strings.Join(orCriteria, " OR "))
