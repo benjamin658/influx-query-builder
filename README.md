@@ -1,6 +1,7 @@
 # Influx Query Builder
 
 [![Build Status](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/benjamin658/influx-query-builder/badge.svg?branch=master)](https://coveralls.io/github/benjamin658/influx-query-builder?branch=master)
 
 > The super lightweight InfluxDB query builder implemented in Go.
 
