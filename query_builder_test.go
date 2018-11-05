@@ -122,7 +122,19 @@ func TestFill(t *testing.T) {
 	assert(t, q, expected)
 }
 
-func TestOrder(t *testing.T) {
+func TestAscOrder(t *testing.T) {
+	var expected = `SELECT "temperature","humidity" FROM "measurement" ORDER BY time ASC`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		Asc().
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestDescOrder(t *testing.T) {
 	var expected = `SELECT "temperature","humidity" FROM "measurement" ORDER BY time DESC`
 	builder := New()
 	q := builder.
