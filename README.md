@@ -2,9 +2,7 @@
 
 [![Build Status](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)
 
-> The super lightweight InfluxDB query builder.
-
-This project is still under active development.
+> The super lightweight InfluxDB query builder implemented in Go.
 
 ## Installation
 
@@ -17,8 +15,9 @@ This project is still under active development.
 ```go
 builder := New()
 query := builder.
-  Select([]string{"temperature", "humidity"}).
-  From("measurement).Build()
+  Select("temperature", "humidity").
+  From("measurement).
+  Build()
 ```
 
 Output:
@@ -32,7 +31,7 @@ SELECT "temperature","humidity" FROM "measurement"
 ```go
 builder := New()
 query := builder.
-  Select([]string{`MEAN("temperature")`, `SUM("humidity")`}).
+  Select(`MEAN("temperature")`, `SUM("humidity")`).
   From("measurement").
   Build()
 ```
@@ -48,7 +47,7 @@ SELECT MEAN("temperature"),SUM("humidity") FROM "measurement"
 ```go
 builder := New()
 query := builder.
-  Select([]string{"temperature", "humidity"}).
+  Select("temperature", "humidity").
   From("measurement").
   Where("time", ">", "2018-11-01T06:33:57.503Z").
   And("time", "<", "2018-11-02T09:35:25Z").
@@ -67,7 +66,7 @@ SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06
 ```go
 builder := New()
 query := builder.
-  Select([]string{"temperature", "humidity"}).
+  Select("temperature", "humidity").
   From("measurement").
   GroupBy("10m").
   Build()
@@ -84,7 +83,7 @@ SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10m)
 ```go
 builder := New()
 query := builder.
-  Select([]string{"temperature", "humidity"}).
+  Select("temperature", "humidity").
   From("measurement").
   Desc().
   Build()
@@ -101,7 +100,7 @@ SELECT "temperature","humidity" FROM "measurement" ORDER BY time DESC
 ```go
 builder := New()
 query := builder.
-  Select([]string{"temperature", "humidity"}).
+  Select("temperature", "humidity").
   From("measurement").
   Limit(10).
   Offset(5).

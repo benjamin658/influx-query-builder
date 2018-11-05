@@ -9,7 +9,7 @@ import (
 
 // QueryBuilder QueryBuilder interface
 type QueryBuilder interface {
-	Select(fields []string) QueryBuilder
+	Select(fields ...string) QueryBuilder
 	From(string) QueryBuilder
 	Where(string, string, interface{}) QueryBuilder
 	And(string, string, interface{}) QueryBuilder
@@ -56,7 +56,7 @@ func (q *query) Clean() QueryBuilder {
 	return New()
 }
 
-func (q *query) Select(fields []string) QueryBuilder {
+func (q *query) Select(fields ...string) QueryBuilder {
 	q.fields = append(q.fields, fields...)
 	return q
 }
