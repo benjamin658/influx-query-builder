@@ -61,6 +61,79 @@ Output:
 SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z' OR "tag" = 't'
 ```
 
+### Brackets criteria
+
+Noted: If you use `Where` with `WhereBrackets`, `Where` will override the `WhereBrackets`.
+
+#### Where Brackets
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  WhereBrackets(
+    // Passing the new builder as the param
+    New().
+      Where("time", ">", "2018-11-01T06:33:57.503Z").
+      And("time", "<", "2018-11-02T09:35:25Z").
+  ).
+  Or("tag", "=", "t").
+  Build()
+```
+
+Output:
+
+```sql
+SELECT "temperature","humidity" FROM "measurement" WHERE ("time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z') OR "tag" = 't'
+```
+
+#### And Brackets
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  Where("time", ">", "2018-11-01T06:33:57.503Z").
+  AndBrackets(
+    // Passing the new builder as the param
+    New().
+      Where("time", "<", "2018-11-02T09:35:25Z").
+      Or("tag", "=", "t"),
+  ).
+  Build()
+```
+
+Output:
+
+```sql
+SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
+```
+
+#### Or Brackets
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  Where("time", ">", "2018-11-01T06:33:57.503Z").
+  OrBrackets(
+    // Passing the new builder as the param
+    New().
+      Where("time", "<", "2018-11-02T09:35:25Z").
+      Or("tag", "=", "t"),
+  ).
+  Build()
+```
+
+Output:
+
+```sql
+SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
+```
+
 ### Group By time
 
 ```go

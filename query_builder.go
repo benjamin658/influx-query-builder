@@ -14,6 +14,9 @@ type QueryBuilder interface {
 	Where(string, string, interface{}) QueryBuilder
 	And(string, string, interface{}) QueryBuilder
 	Or(string, string, interface{}) QueryBuilder
+	WhereBrackets(QueryBuilder) QueryBuilder
+	AndBrackets(QueryBuilder) QueryBuilder
+	OrBrackets(QueryBuilder) QueryBuilder
 	GroupBy(string) QueryBuilder
 	Fill(interface{}) QueryBuilder
 	Limit(int) QueryBuilder
@@ -36,6 +39,9 @@ type query struct {
 	where       tag
 	and         []tag
 	or          []tag
+	groupWhere  QueryBuilder
+	groupAnd    []QueryBuilder
+	groupOr     []QueryBuilder
 	groupBy     string
 	order       string
 	limit       int
@@ -81,6 +87,21 @@ func (q *query) Or(key string, op string, value interface{}) QueryBuilder {
 	return q
 }
 
+func (q *query) WhereBrackets(builder QueryBuilder) QueryBuilder {
+	q.groupWhere = builder
+	return q
+}
+
+func (q *query) AndBrackets(builder QueryBuilder) QueryBuilder {
+	q.groupAnd = append(q.groupAnd, builder)
+	return q
+}
+
+func (q *query) OrBrackets(builder QueryBuilder) QueryBuilder {
+	q.groupOr = append(q.groupOr, builder)
+	return q
+}
+
 func (q *query) GroupBy(time string) QueryBuilder {
 	q.groupBy = time
 	return q
@@ -113,19 +134,15 @@ func (q *query) Asc() QueryBuilder {
 
 func (q *query) Build() string {
 	var buffer bytes.Buffer
-	selectStmt := q.buildFields()
-	fromStmt := q.buildFrom()
 
-	if selectStmt != "" && fromStmt != "" {
-		buffer.WriteString(selectStmt)
-		buffer.WriteString(fromStmt)
-		buffer.WriteString(q.buildWhere())
-		buffer.WriteString(q.buildGroupBy())
-		buffer.WriteString(q.buildFill())
-		buffer.WriteString(q.buildOrder())
-		buffer.WriteString(q.buildLimit())
-		buffer.WriteString(q.buildOffset())
-	}
+	buffer.WriteString(q.buildFields())
+	buffer.WriteString(q.buildFrom())
+	buffer.WriteString(q.buildWhere())
+	buffer.WriteString(q.buildGroupBy())
+	buffer.WriteString(q.buildFill())
+	buffer.WriteString(q.buildOrder())
+	buffer.WriteString(q.buildLimit())
+	buffer.WriteString(q.buildOffset())
 
 	return strings.TrimSpace(buffer.String())
 }
@@ -161,16 +178,21 @@ func (q *query) buildFrom() string {
 
 func (q *query) buildWhere() string {
 	var buffer bytes.Buffer
+	var whereCriteria string
+	andCriteria := make([]string, 0)
+	orCriteria := make([]string, 0)
 
-	if q.where != (tag{}) {
-		var whereCriteria string
-		andCriteria := make([]string, 0)
-		orCriteria := make([]string, 0)
-
-		buffer.WriteString("WHERE ")
-		whereCriteria = fmt.Sprintf(`"%s" %s '%s'`, q.where.key, q.where.op, q.where.value)
-		buffer.WriteString(whereCriteria)
-		buffer.WriteString(" ")
+	if q.where != (tag{}) || q.groupWhere != nil {
+		if q.where != (tag{}) {
+			buffer.WriteString("WHERE ")
+			whereCriteria = fmt.Sprintf(`"%s" %s '%s'`, q.where.key, q.where.op, q.where.value)
+			buffer.WriteString(whereCriteria)
+			buffer.WriteString(" ")
+		} else if q.groupWhere != nil {
+			buffer.WriteString("WHERE (")
+			buffer.WriteString(strings.Replace(q.groupWhere.Build(), "WHERE ", "", 1))
+			buffer.WriteString(") ")
+		}
 
 		if q.and != nil {
 			buffer.WriteString("AND ")
@@ -196,7 +218,21 @@ func (q *query) buildWhere() string {
 			buffer.WriteString(" ")
 		}
 
-		buffer.WriteString(" ")
+		if q.groupAnd != nil {
+			for _, g := range q.groupAnd {
+				buffer.WriteString("AND (")
+				buffer.WriteString(strings.Replace(g.Build(), "WHERE ", "", 1))
+				buffer.WriteString(") ")
+			}
+		}
+
+		if q.groupOr != nil {
+			for _, g := range q.groupOr {
+				buffer.WriteString("OR (")
+				buffer.WriteString(strings.Replace(g.Build(), "WHERE ", "", 1))
+				buffer.WriteString(") ")
+			}
+		}
 	}
 
 	return buffer.String()

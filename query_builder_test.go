@@ -146,3 +146,54 @@ func TestLimitOffset(t *testing.T) {
 
 	assert(t, q, expected)
 }
+
+func TestBracketsWhere(t *testing.T) {
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE ("time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z') OR "tag" = 't'`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		WhereBrackets(
+			New().
+				Where("time", ">", "2018-11-01T06:33:57.503Z").
+				And("time", "<", "2018-11-02T09:35:25Z"),
+		).
+		Or("tag", "=", "t").
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestBracketsAndCriteria(t *testing.T) {
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		Where("time", ">", "2018-11-01T06:33:57.503Z").
+		AndBrackets(
+			New().
+				Where("time", "<", "2018-11-02T09:35:25Z").
+				Or("tag", "=", "t"),
+		).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestBracketsOrCriteria(t *testing.T) {
+	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		Where("time", ">", "2018-11-01T06:33:57.503Z").
+		OrBrackets(
+			New().
+				Where("time", "<", "2018-11-02T09:35:25Z").
+				Or("tag", "=", "t"),
+		).
+		Build()
+
+	assert(t, q, expected)
+}
