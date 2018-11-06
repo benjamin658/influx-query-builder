@@ -231,6 +231,7 @@ func TestWhereTypeSqlQuote(t *testing.T) {
 }
 
 func TestGetQueryStruct(t *testing.T) {
+	var expected uint = 100
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -240,7 +241,7 @@ func TestGetQueryStruct(t *testing.T) {
 		Asc().
 		GetQueryStruct()
 
-	assert(t, q.limit, 100)
-	assert(t, q.offset, 100)
+	assert(t, q.limit, expected)
+	assert(t, q.offset, expected)
 	assert(t, q.order, "ASC")
 }

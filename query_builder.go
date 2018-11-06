@@ -19,8 +19,8 @@ type QueryBuilder interface {
 	OrBrackets(QueryBuilder) QueryBuilder
 	GroupBy(string) QueryBuilder
 	Fill(interface{}) QueryBuilder
-	Limit(int) QueryBuilder
-	Offset(int) QueryBuilder
+	Limit(uint) QueryBuilder
+	Offset(uint) QueryBuilder
 	Desc() QueryBuilder
 	Asc() QueryBuilder
 	Build() string
@@ -45,17 +45,16 @@ type query struct {
 	groupOr     []QueryBuilder
 	groupBy     string
 	order       string
-	limit       int
-	offset      int
+	limit       uint
+	_limit      bool
+	offset      uint
+	_offset     bool
 	fill        interface{}
 }
 
 // New New QueryBuilder
 func New() QueryBuilder {
-	return &query{
-		limit:  -1,
-		offset: -1,
-	}
+	return &query{}
 }
 
 // Clean Clean current builder and get a new one
@@ -113,12 +112,14 @@ func (q *query) Fill(fill interface{}) QueryBuilder {
 	return q
 }
 
-func (q *query) Limit(limit int) QueryBuilder {
+func (q *query) Limit(limit uint) QueryBuilder {
+	q._limit = true
 	q.limit = limit
 	return q
 }
 
-func (q *query) Offset(offset int) QueryBuilder {
+func (q *query) Offset(offset uint) QueryBuilder {
+	q._offset = true
 	q.offset = offset
 	return q
 }
@@ -288,7 +289,7 @@ func (q *query) buildOrder() string {
 func (q *query) buildLimit() string {
 	var buffer bytes.Buffer
 
-	if q.limit != -1 {
+	if q._limit {
 		buffer.WriteString(
 			fmt.Sprintf(`LIMIT %v`, q.limit),
 		)
@@ -302,7 +303,7 @@ func (q *query) buildLimit() string {
 func (q *query) buildOffset() string {
 	var buffer bytes.Buffer
 
-	if q.offset != -1 {
+	if q._offset {
 		buffer.WriteString(
 			fmt.Sprintf(`OFFSET %v`, q.offset),
 		)
