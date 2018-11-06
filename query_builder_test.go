@@ -241,7 +241,12 @@ func TestGetQueryStruct(t *testing.T) {
 		Asc().
 		GetQueryStruct()
 
-	assert(t, q.limit, expected)
-	assert(t, q.offset, expected)
-	assert(t, q.order, "ASC")
+	assert(t, q.Fields[0], "temperature")
+	assert(t, q.Fields[1], "humidity")
+	assert(t, q.Measurement, "measurement")
+	assert(t, q.Limit, expected)
+	assert(t, q.IsLimitSet, true)
+	assert(t, q.Offset, expected)
+	assert(t, q.IsOffsetSet, true)
+	assert(t, q.Order, "ASC")
 }

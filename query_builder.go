@@ -25,7 +25,7 @@ type QueryBuilder interface {
 	Asc() QueryBuilder
 	Build() string
 	Clean() QueryBuilder
-	GetQueryStruct() Query
+	GetQueryStruct() CurrentQuery
 }
 
 // Tag Tag struct
@@ -52,6 +52,18 @@ type Query struct {
 	offset      uint
 	_offset     bool
 	fill        interface{}
+}
+
+// CurrentQuery Get current query
+type CurrentQuery struct {
+	Measurement string
+	Fields      []string
+	GroupBy     string
+	Limit       uint
+	Offset      uint
+	Order       string
+	IsLimitSet  bool
+	IsOffsetSet bool
 }
 
 // New New QueryBuilder
@@ -151,8 +163,17 @@ func (q *Query) Asc() QueryBuilder {
 }
 
 // GetQueryStruct Get query struct
-func (q *Query) GetQueryStruct() Query {
-	return *q
+func (q *Query) GetQueryStruct() CurrentQuery {
+	return CurrentQuery{
+		Measurement: q.measurement,
+		Fields:      q.fields,
+		GroupBy:     q.groupBy,
+		Limit:       q.limit,
+		Offset:      q.offset,
+		Order:       q.order,
+		IsLimitSet:  q._limit,
+		IsOffsetSet: q._offset,
+	}
 }
 
 // Build Build query string
