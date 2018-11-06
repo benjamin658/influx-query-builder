@@ -25,12 +25,13 @@ type QueryBuilder interface {
 	Asc() QueryBuilder
 	Build() string
 	Clean() QueryBuilder
+	GetQueryStruct() query
 }
 
 type tag struct {
 	key   string
 	op    string
-	value string
+	value interface{}
 }
 
 type query struct {
@@ -73,17 +74,17 @@ func (q *query) From(measurement string) QueryBuilder {
 }
 
 func (q *query) Where(key string, op string, value interface{}) QueryBuilder {
-	q.where = tag{key, op, fmt.Sprint(value)}
+	q.where = tag{key, op, value}
 	return q
 }
 
 func (q *query) And(key string, op string, value interface{}) QueryBuilder {
-	q.and = append(q.and, tag{key, op, fmt.Sprint(value)})
+	q.and = append(q.and, tag{key, op, value})
 	return q
 }
 
 func (q *query) Or(key string, op string, value interface{}) QueryBuilder {
-	q.or = append(q.or, tag{key, op, fmt.Sprint(value)})
+	q.or = append(q.or, tag{key, op, value})
 	return q
 }
 
@@ -130,6 +131,10 @@ func (q *query) Desc() QueryBuilder {
 func (q *query) Asc() QueryBuilder {
 	q.order = "ASC"
 	return q
+}
+
+func (q *query) GetQueryStruct() query {
+	return *q
 }
 
 func (q *query) Build() string {
@@ -185,7 +190,7 @@ func (q *query) buildWhere() string {
 	if q.where != (tag{}) || q.groupWhere != nil {
 		if q.where != (tag{}) {
 			buffer.WriteString("WHERE ")
-			whereCriteria = fmt.Sprintf(`"%s" %s '%s'`, q.where.key, q.where.op, q.where.value)
+			whereCriteria = getCriteriaTemplate(q.where)
 			buffer.WriteString(whereCriteria)
 			buffer.WriteString(" ")
 		} else if q.groupWhere != nil {
@@ -199,7 +204,7 @@ func (q *query) buildWhere() string {
 			for _, tag := range q.and {
 				andCriteria = append(
 					andCriteria,
-					fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value),
+					getCriteriaTemplate(tag),
 				)
 			}
 			buffer.WriteString(strings.Join(andCriteria, " AND "))
@@ -211,7 +216,7 @@ func (q *query) buildWhere() string {
 			for _, tag := range q.or {
 				orCriteria = append(
 					orCriteria,
-					fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value),
+					getCriteriaTemplate(tag),
 				)
 			}
 			buffer.WriteString(strings.Join(orCriteria, " OR "))
@@ -306,4 +311,17 @@ func (q *query) buildOffset() string {
 	}
 
 	return buffer.String()
+}
+
+func getCriteriaTemplate(tag tag) string {
+	switch tag.value.(type) {
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
+		return fmt.Sprintf(`"%s" %s %d`, tag.key, tag.op, tag.value)
+	case float32, float64:
+		return fmt.Sprintf(`"%s" %s %g`, tag.key, tag.op, tag.value)
+	case bool:
+		return fmt.Sprintf(`"%s" %s %t`, tag.key, tag.op, tag.value)
+	default:
+		return fmt.Sprintf(`"%s" %s '%s'`, tag.key, tag.op, tag.value)
+	}
 }

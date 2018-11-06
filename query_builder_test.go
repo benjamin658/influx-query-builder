@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func assert(t *testing.T, q string, expected string) {
+func assert(t *testing.T, q interface{}, expected interface{}) {
 	if q != expected {
 		t.Error(fmt.Sprintf("Expected %s but got %s", expected, q))
 	}
@@ -13,7 +13,7 @@ func assert(t *testing.T, q string, expected string) {
 
 func TestClean(t *testing.T) {
 	builder := New()
-	var expected = ""
+	expected := ""
 	builder.
 		Select("temperature", "humidity").
 		From("measurement").
@@ -26,18 +26,17 @@ func TestClean(t *testing.T) {
 
 func TestSelect(t *testing.T) {
 	builder := New()
-	var expected = `SELECT "temperature","humidity" FROM "measurement"`
+	expected := `SELECT "temperature","humidity" FROM "measurement"`
 	q := builder.
 		Select("temperature", "humidity").
 		From("measurement").
 		Build()
 
 	assert(t, q, expected)
-	builder = builder.Clean()
 }
 
 func TestSelectFunction(t *testing.T) {
-	var expected = `SELECT MEAN("temperature"),SUM("humidity") FROM "measurement"`
+	expected := `SELECT MEAN("temperature"),SUM("humidity") FROM "measurement"`
 	builder := New()
 	q := builder.
 		Select(`MEAN("temperature")`, `SUM("humidity")`).
@@ -48,7 +47,7 @@ func TestSelectFunction(t *testing.T) {
 }
 
 func TestWhere(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" < '2018-11-02T09:35:25Z'`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" < '2018-11-02T09:35:25Z'`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -59,7 +58,7 @@ func TestWhere(t *testing.T) {
 }
 
 func TestAnd(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z'`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z'`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -72,7 +71,7 @@ func TestAnd(t *testing.T) {
 }
 
 func TestOr(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR "time" < '2018-11-02T09:35:25Z'`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR "time" < '2018-11-02T09:35:25Z'`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -85,7 +84,7 @@ func TestOr(t *testing.T) {
 }
 
 func TestWhereAndOr(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z' OR "tag" = 't'`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z' OR "tag" = 't'`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -99,7 +98,7 @@ func TestWhereAndOr(t *testing.T) {
 }
 
 func TestGroupBy(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10m)`
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10m)`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -111,7 +110,7 @@ func TestGroupBy(t *testing.T) {
 }
 
 func TestFill(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" FILL(1)`
+	expected := `SELECT "temperature","humidity" FROM "measurement" FILL(1)`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -123,7 +122,7 @@ func TestFill(t *testing.T) {
 }
 
 func TestAscOrder(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" ORDER BY time ASC`
+	expected := `SELECT "temperature","humidity" FROM "measurement" ORDER BY time ASC`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -135,7 +134,7 @@ func TestAscOrder(t *testing.T) {
 }
 
 func TestDescOrder(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" ORDER BY time DESC`
+	expected := `SELECT "temperature","humidity" FROM "measurement" ORDER BY time DESC`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -147,7 +146,7 @@ func TestDescOrder(t *testing.T) {
 }
 
 func TestLimitOffset(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" LIMIT 10 OFFSET 5`
+	expected := `SELECT "temperature","humidity" FROM "measurement" LIMIT 10 OFFSET 5`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -160,7 +159,7 @@ func TestLimitOffset(t *testing.T) {
 }
 
 func TestBracketsWhere(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE ("time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z') OR "tag" = 't'`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE ("time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z') OR "tag" = 't'`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -177,7 +176,7 @@ func TestBracketsWhere(t *testing.T) {
 }
 
 func TestBracketsAndCriteria(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -194,7 +193,7 @@ func TestBracketsAndCriteria(t *testing.T) {
 }
 
 func TestBracketsOrCriteria(t *testing.T) {
-	var expected = `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')`
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')`
 	builder := New()
 	q := builder.
 		Select("temperature", "humidity").
@@ -208,4 +207,40 @@ func TestBracketsOrCriteria(t *testing.T) {
 		Build()
 
 	assert(t, q, expected)
+}
+
+func TestWhereTypeSqlQuote(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "temperature" > 20 OR "humidity" < 10.101`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		Where("temperature", ">", 20).
+		Or("humidity", "<", 10.101).
+		Build()
+	assert(t, q, expected)
+
+	expected = `SELECT "temperature" FROM "measurement" WHERE "hot" = true`
+	q = builder.
+		Clean().
+		Select("temperature").
+		From("measurement").
+		Where("hot", "=", true).
+		Build()
+	assert(t, q, expected)
+}
+
+func TestGetQueryStruct(t *testing.T) {
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		Limit(100).
+		Offset(100).
+		Asc().
+		GetQueryStruct()
+
+	assert(t, q.limit, 100)
+	assert(t, q.offset, 100)
+	assert(t, q.order, "ASC")
 }

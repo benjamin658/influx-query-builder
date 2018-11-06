@@ -75,7 +75,7 @@ query := builder.
   Select("temperature", "humidity").
   From("measurement").
   WhereBrackets(
-    // Passing the new builder as the param
+    // Passing a new builder as the param
     New().
       Where("time", ">", "2018-11-01T06:33:57.503Z").
       And("time", "<", "2018-11-02T09:35:25Z").
@@ -99,7 +99,7 @@ query := builder.
   From("measurement").
   Where("time", ">", "2018-11-01T06:33:57.503Z").
   AndBrackets(
-    // Passing the new builder as the param
+    // Passing a new builder as the param
     New().
       Where("time", "<", "2018-11-02T09:35:25Z").
       Or("tag", "=", "t"),
@@ -194,6 +194,23 @@ SELECT "temperature","humidity" FROM "measurement" LIMIT 10 OFFSET 5
 builder := New()
 // some code...
 builder = builder.Clean()
+```
+
+### Get current query struct
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  Limit(100).
+  Offset(100).
+  Asc().
+  GetQueryStruct()
+
+// query.limit == 100
+// query.offset == 100
+// query.order == "ASC"
 ```
 
 ## License
