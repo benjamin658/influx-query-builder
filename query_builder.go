@@ -25,21 +25,23 @@ type QueryBuilder interface {
 	Asc() QueryBuilder
 	Build() string
 	Clean() QueryBuilder
-	GetQueryStruct() query
+	GetQueryStruct() Query
 }
 
-type tag struct {
+// Tag Tag struct
+type Tag struct {
 	key   string
 	op    string
 	value interface{}
 }
 
-type query struct {
+// Query Query struct
+type Query struct {
 	measurement string
 	fields      []string
-	where       tag
-	and         []tag
-	or          []tag
+	where       Tag
+	and         []Tag
+	or          []Tag
 	groupWhere  QueryBuilder
 	groupAnd    []QueryBuilder
 	groupOr     []QueryBuilder
@@ -54,91 +56,107 @@ type query struct {
 
 // New New QueryBuilder
 func New() QueryBuilder {
-	return &query{}
+	return &Query{}
 }
 
 // Clean Clean current builder and get a new one
-func (q *query) Clean() QueryBuilder {
+func (q *Query) Clean() QueryBuilder {
 	return New()
 }
 
-func (q *query) Select(fields ...string) QueryBuilder {
+// Select Select fields...
+func (q *Query) Select(fields ...string) QueryBuilder {
 	q.fields = append(q.fields, fields...)
 	return q
 }
 
-func (q *query) From(measurement string) QueryBuilder {
+// From From measurement
+func (q *Query) From(measurement string) QueryBuilder {
 	q.measurement = measurement
 	return q
 }
 
-func (q *query) Where(key string, op string, value interface{}) QueryBuilder {
-	q.where = tag{key, op, value}
+// Where Where criteria
+func (q *Query) Where(key string, op string, value interface{}) QueryBuilder {
+	q.where = Tag{key, op, value}
 	return q
 }
 
-func (q *query) And(key string, op string, value interface{}) QueryBuilder {
-	q.and = append(q.and, tag{key, op, value})
+// And And criteria
+func (q *Query) And(key string, op string, value interface{}) QueryBuilder {
+	q.and = append(q.and, Tag{key, op, value})
 	return q
 }
 
-func (q *query) Or(key string, op string, value interface{}) QueryBuilder {
-	q.or = append(q.or, tag{key, op, value})
+// Or Or criteria
+func (q *Query) Or(key string, op string, value interface{}) QueryBuilder {
+	q.or = append(q.or, Tag{key, op, value})
 	return q
 }
 
-func (q *query) WhereBrackets(builder QueryBuilder) QueryBuilder {
+// WhereBrackets WHERE (...)
+func (q *Query) WhereBrackets(builder QueryBuilder) QueryBuilder {
 	q.groupWhere = builder
 	return q
 }
 
-func (q *query) AndBrackets(builder QueryBuilder) QueryBuilder {
+// AndBrackets AND (...)
+func (q *Query) AndBrackets(builder QueryBuilder) QueryBuilder {
 	q.groupAnd = append(q.groupAnd, builder)
 	return q
 }
 
-func (q *query) OrBrackets(builder QueryBuilder) QueryBuilder {
+// OrBrackets OR (...)
+func (q *Query) OrBrackets(builder QueryBuilder) QueryBuilder {
 	q.groupOr = append(q.groupOr, builder)
 	return q
 }
 
-func (q *query) GroupBy(time string) QueryBuilder {
+// GroupBy GROUP BY time
+func (q *Query) GroupBy(time string) QueryBuilder {
 	q.groupBy = time
 	return q
 }
 
-func (q *query) Fill(fill interface{}) QueryBuilder {
+// Fill FILL(...)
+func (q *Query) Fill(fill interface{}) QueryBuilder {
 	q.fill = fill
 	return q
 }
 
-func (q *query) Limit(limit uint) QueryBuilder {
+// Limit LIMIT x
+func (q *Query) Limit(limit uint) QueryBuilder {
 	q._limit = true
 	q.limit = limit
 	return q
 }
 
-func (q *query) Offset(offset uint) QueryBuilder {
+// Offset OFFSET x
+func (q *Query) Offset(offset uint) QueryBuilder {
 	q._offset = true
 	q.offset = offset
 	return q
 }
 
-func (q *query) Desc() QueryBuilder {
+// Desc ORDER BY time DESC
+func (q *Query) Desc() QueryBuilder {
 	q.order = "DESC"
 	return q
 }
 
-func (q *query) Asc() QueryBuilder {
+// Asc ORDER BY time ASC
+func (q *Query) Asc() QueryBuilder {
 	q.order = "ASC"
 	return q
 }
 
-func (q *query) GetQueryStruct() query {
+// GetQueryStruct Get query struct
+func (q *Query) GetQueryStruct() Query {
 	return *q
 }
 
-func (q *query) Build() string {
+// Build Build query string
+func (q *Query) Build() string {
 	var buffer bytes.Buffer
 
 	buffer.WriteString(q.buildFields())
@@ -155,7 +173,7 @@ func (q *query) Build() string {
 
 var functionMatcher = regexp.MustCompile(`.+\(.+\)$`)
 
-func (q *query) buildFields() string {
+func (q *Query) buildFields() string {
 	if q.fields == nil {
 		return ""
 	}
@@ -174,7 +192,7 @@ func (q *query) buildFields() string {
 	return fmt.Sprintf("SELECT %s ", strings.Join(fields, ","))
 }
 
-func (q *query) buildFrom() string {
+func (q *Query) buildFrom() string {
 	if q.measurement == "" {
 		return ""
 	}
@@ -182,14 +200,14 @@ func (q *query) buildFrom() string {
 	return fmt.Sprintf(`FROM "%s" `, q.measurement)
 }
 
-func (q *query) buildWhere() string {
+func (q *Query) buildWhere() string {
 	var buffer bytes.Buffer
 	var whereCriteria string
 	andCriteria := make([]string, 0)
 	orCriteria := make([]string, 0)
 
-	if q.where != (tag{}) || q.groupWhere != nil {
-		if q.where != (tag{}) {
+	if q.where != (Tag{}) || q.groupWhere != nil {
+		if q.where != (Tag{}) {
 			buffer.WriteString("WHERE ")
 			whereCriteria = getCriteriaTemplate(q.where)
 			buffer.WriteString(whereCriteria)
@@ -244,7 +262,7 @@ func (q *query) buildWhere() string {
 	return buffer.String()
 }
 
-func (q *query) buildGroupBy() string {
+func (q *Query) buildGroupBy() string {
 	var buffer bytes.Buffer
 
 	if q.groupBy != "" {
@@ -258,7 +276,7 @@ func (q *query) buildGroupBy() string {
 	return buffer.String()
 }
 
-func (q *query) buildFill() string {
+func (q *Query) buildFill() string {
 	var buffer bytes.Buffer
 
 	if q.fill != nil {
@@ -272,7 +290,7 @@ func (q *query) buildFill() string {
 	return buffer.String()
 }
 
-func (q *query) buildOrder() string {
+func (q *Query) buildOrder() string {
 	var buffer bytes.Buffer
 
 	if q.order != "" {
@@ -286,7 +304,7 @@ func (q *query) buildOrder() string {
 	return buffer.String()
 }
 
-func (q *query) buildLimit() string {
+func (q *Query) buildLimit() string {
 	var buffer bytes.Buffer
 
 	if q._limit {
@@ -300,7 +318,7 @@ func (q *query) buildLimit() string {
 	return buffer.String()
 }
 
-func (q *query) buildOffset() string {
+func (q *Query) buildOffset() string {
 	var buffer bytes.Buffer
 
 	if q._offset {
@@ -314,7 +332,7 @@ func (q *query) buildOffset() string {
 	return buffer.String()
 }
 
-func getCriteriaTemplate(tag tag) string {
+func getCriteriaTemplate(tag Tag) string {
 	switch tag.value.(type) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return fmt.Sprintf(`"%s" %s %d`, tag.key, tag.op, tag.value)
