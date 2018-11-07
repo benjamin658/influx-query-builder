@@ -122,7 +122,7 @@ query := builder.
   From("measurement").
   Where("time", ">", "2018-11-01T06:33:57.503Z").
   OrBrackets(
-    // Passing the new builder as the param
+    // Passing a new builder as the param
     New().
       Where("time", "<", "2018-11-02T09:35:25Z").
       Or("tag", "=", "t"),
@@ -208,9 +208,24 @@ query := builder.
   Asc().
   GetQueryStruct()
 
-// query.limit == 100
-// query.offset == 100
-// query.order == "ASC"
+/*
+type CurrentQuery struct {
+  Measurement   string
+  Where         Tag
+  And           []Tag
+  Or            []Tag
+  WhereBrackets QueryBuilder
+  AndBrackets   []QueryBuilder
+  OrBrackets    []QueryBuilder
+  Fields        []string
+  GroupBy       string
+  Limit         uint
+  Offset        uint
+  Order         string
+  IsLimitSet    bool
+  IsOffsetSet   bool
+}
+*/
 ```
 
 ## License

@@ -37,33 +37,39 @@ type Tag struct {
 
 // Query Query struct
 type Query struct {
-	measurement string
-	fields      []string
-	where       Tag
-	and         []Tag
-	or          []Tag
-	groupWhere  QueryBuilder
-	groupAnd    []QueryBuilder
-	groupOr     []QueryBuilder
-	groupBy     string
-	order       string
-	limit       uint
-	_limit      bool
-	offset      uint
-	_offset     bool
-	fill        interface{}
+	measurement   string
+	fields        []string
+	where         Tag
+	and           []Tag
+	or            []Tag
+	whereBrackets QueryBuilder
+	andBrackets   []QueryBuilder
+	orBrackets    []QueryBuilder
+	groupBy       string
+	order         string
+	limit         uint
+	_limit        bool
+	offset        uint
+	_offset       bool
+	fill          interface{}
 }
 
 // CurrentQuery Get current query
 type CurrentQuery struct {
-	Measurement string
-	Fields      []string
-	GroupBy     string
-	Limit       uint
-	Offset      uint
-	Order       string
-	IsLimitSet  bool
-	IsOffsetSet bool
+	Measurement   string
+	Where         Tag
+	And           []Tag
+	Or            []Tag
+	WhereBrackets QueryBuilder
+	AndBrackets   []QueryBuilder
+	OrBrackets    []QueryBuilder
+	Fields        []string
+	GroupBy       string
+	Limit         uint
+	Offset        uint
+	Order         string
+	IsLimitSet    bool
+	IsOffsetSet   bool
 }
 
 // New New QueryBuilder
@@ -108,19 +114,19 @@ func (q *Query) Or(key string, op string, value interface{}) QueryBuilder {
 
 // WhereBrackets WHERE (...)
 func (q *Query) WhereBrackets(builder QueryBuilder) QueryBuilder {
-	q.groupWhere = builder
+	q.whereBrackets = builder
 	return q
 }
 
 // AndBrackets AND (...)
 func (q *Query) AndBrackets(builder QueryBuilder) QueryBuilder {
-	q.groupAnd = append(q.groupAnd, builder)
+	q.andBrackets = append(q.andBrackets, builder)
 	return q
 }
 
 // OrBrackets OR (...)
 func (q *Query) OrBrackets(builder QueryBuilder) QueryBuilder {
-	q.groupOr = append(q.groupOr, builder)
+	q.orBrackets = append(q.orBrackets, builder)
 	return q
 }
 
@@ -165,14 +171,20 @@ func (q *Query) Asc() QueryBuilder {
 // GetQueryStruct Get query struct
 func (q *Query) GetQueryStruct() CurrentQuery {
 	return CurrentQuery{
-		Measurement: q.measurement,
-		Fields:      q.fields,
-		GroupBy:     q.groupBy,
-		Limit:       q.limit,
-		Offset:      q.offset,
-		Order:       q.order,
-		IsLimitSet:  q._limit,
-		IsOffsetSet: q._offset,
+		Measurement:   q.measurement,
+		Where:         q.where,
+		And:           q.and,
+		Or:            q.or,
+		WhereBrackets: q.whereBrackets,
+		AndBrackets:   q.andBrackets,
+		OrBrackets:    q.orBrackets,
+		Fields:        q.fields,
+		GroupBy:       q.groupBy,
+		Limit:         q.limit,
+		Offset:        q.offset,
+		Order:         q.order,
+		IsLimitSet:    q._limit,
+		IsOffsetSet:   q._offset,
 	}
 }
 
@@ -227,15 +239,15 @@ func (q *Query) buildWhere() string {
 	andCriteria := make([]string, 0)
 	orCriteria := make([]string, 0)
 
-	if q.where != (Tag{}) || q.groupWhere != nil {
+	if q.where != (Tag{}) || q.whereBrackets != nil {
 		if q.where != (Tag{}) {
 			buffer.WriteString("WHERE ")
 			whereCriteria = getCriteriaTemplate(q.where)
 			buffer.WriteString(whereCriteria)
 			buffer.WriteString(" ")
-		} else if q.groupWhere != nil {
+		} else if q.whereBrackets != nil {
 			buffer.WriteString("WHERE (")
-			buffer.WriteString(strings.Replace(q.groupWhere.Build(), "WHERE ", "", 1))
+			buffer.WriteString(strings.Replace(q.whereBrackets.Build(), "WHERE ", "", 1))
 			buffer.WriteString(") ")
 		}
 
@@ -263,16 +275,16 @@ func (q *Query) buildWhere() string {
 			buffer.WriteString(" ")
 		}
 
-		if q.groupAnd != nil {
-			for _, g := range q.groupAnd {
+		if q.andBrackets != nil {
+			for _, g := range q.andBrackets {
 				buffer.WriteString("AND (")
 				buffer.WriteString(strings.Replace(g.Build(), "WHERE ", "", 1))
 				buffer.WriteString(") ")
 			}
 		}
 
-		if q.groupOr != nil {
-			for _, g := range q.groupOr {
+		if q.orBrackets != nil {
+			for _, g := range q.orBrackets {
 				buffer.WriteString("OR (")
 				buffer.WriteString(strings.Replace(g.Build(), "WHERE ", "", 1))
 				buffer.WriteString(") ")
