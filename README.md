@@ -3,6 +3,7 @@
 [![Build Status](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)](https://travis-ci.org/benjamin658/influx-query-builder.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/benjamin658/influx-query-builder/badge.svg?branch=master)](https://coveralls.io/github/benjamin658/influx-query-builder?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/dbdc74b92709494b839a0e0e72d1f6a6)](https://app.codacy.com/app/benjamin658/influx-query-builder?utm_source=github.com&utm_medium=referral&utm_content=benjamin658/influx-query-builder&utm_campaign=Badge_Grade_Dashboard)
+[![Go Report Card](https://goreportcard.com/badge/github.com/benjamin658/influx-query-builder)](https://goreportcard.com/report/github.com/benjamin658/influx-query-builder)
 
 > The super lightweight InfluxDB query builder implemented in Go.
 
