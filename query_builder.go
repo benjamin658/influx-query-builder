@@ -211,7 +211,7 @@ func (q *Query) buildFields() string {
 		return ""
 	}
 
-	tmpl := `"%s"`
+	tmpl := `%s`
 	fields := make([]string, len(q.fields))
 
 	for i := range fields {
