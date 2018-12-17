@@ -211,14 +211,13 @@ func (q *Query) buildFields() string {
 		return ""
 	}
 
-	tmpl := `%s`
 	fields := make([]string, len(q.fields))
 
 	for i := range fields {
 		if functionMatcher.MatchString(q.fields[i]) {
 			fields[i] = q.fields[i]
 		} else {
-			fields[i] = fmt.Sprintf(tmpl, q.fields[i])
+			fields[i] = fmt.Sprintf("\"%s\"", q.fields[i])
 		}
 	}
 
