@@ -212,6 +212,7 @@ func TestGroupByTimeWeek(t *testing.T) {
 
 	assert(t, q, expected)
 }
+
 func TestGroupByTag(t *testing.T) {
 	expected := `SELECT temperature,humidity FROM "measurement" GROUP BY sensorId`
 	builder := New()

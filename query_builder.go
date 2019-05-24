@@ -161,6 +161,8 @@ type CurrentQuery struct {
 	OrBrackets    []QueryBuilder
 	Fields        []string
 	GroupBy       string
+	GroupByTime   string
+	GroupByTag    string
 	Limit         uint
 	Offset        uint
 	Order         string
@@ -288,6 +290,8 @@ func (q *Query) GetQueryStruct() CurrentQuery {
 		OrBrackets:    q.orBrackets,
 		Fields:        q.fields,
 		GroupBy:       q.groupBy,
+		GroupByTime:   q.groupByTime,
+		GroupByTag:    q.groupByTag,
 		Limit:         q.limit,
 		Offset:        q.offset,
 		Order:         q.order,
