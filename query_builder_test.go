@@ -119,6 +119,122 @@ func TestGroupBy(t *testing.T) {
 	assert(t, q, expected)
 }
 
+func TestGroupByTimeNanoSec(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10ns)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Nanoseconds(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeMicroSec(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10u)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Microseconds(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeMillSec(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10ms)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Milliseconds(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeSec(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10s)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Second(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeMinute(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10m)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Minute(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeHour(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10h)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Hour(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeDay(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10d)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Day(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTimeWeek(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10w)`
+	builder := New()
+	duration := NewDuration()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(duration.Week(10)).
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestGroupByTag(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY sensorId`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTag("sensorId").
+		Build()
+
+	assert(t, q, expected)
+}
+
 func TestFill(t *testing.T) {
 	expected := `SELECT "temperature","humidity" FROM "measurement" FILL(1)`
 	builder := New()
