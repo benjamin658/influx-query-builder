@@ -26,7 +26,7 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement"
+SELECT "temperature","humidity" FROM "measurement"
 ```
 
 ### Function query
@@ -61,7 +61,7 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z' OR "tag" = 't'
+SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z' OR "tag" = 't'
 ```
 
 ### Brackets criteria
@@ -88,7 +88,7 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" WHERE ("time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z') OR "tag" = 't'
+SELECT "temperature","humidity" FROM "measurement" WHERE ("time" > '2018-11-01T06:33:57.503Z' AND "time" < '2018-11-02T09:35:25Z') OR "tag" = 't'
 ```
 
 #### And Brackets
@@ -111,7 +111,7 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
+SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' AND ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
 ```
 
 #### Or Brackets
@@ -134,24 +134,42 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
+SELECT "temperature","humidity" FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
 ```
 
-### Group By time
+### Group By time duration
 
 ```go
 builder := New()
+duration := NewDuration()
 query := builder.
   Select("temperature", "humidity").
   From("measurement").
-  GroupBy("10m").
+  GroupByTime(duration.Minute(10)).
   Build()
 ```
 
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" GROUP BY time(10m)
+SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10m)
+```
+
+### Group By Tag
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  GroupByTag("sensorId").
+  Build()
+```
+
+Output:
+
+```sql
+SELECT "temperature","humidity" FROM "measurement" GROUP BY sensorId
 ```
 
 ### Order By time
@@ -168,7 +186,7 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" ORDER BY time DESC
+SELECT "temperature","humidity" FROM "measurement" ORDER BY time DESC
 ```
 
 ### Limit and Offset
@@ -186,7 +204,7 @@ query := builder.
 Output:
 
 ```sql
-SELECT temperature,humidity FROM "measurement" LIMIT 10 OFFSET 5
+SELECT "temperature","humidity" FROM "measurement" LIMIT 10 OFFSET 5
 ```
 
 ### Reset builder and get a new one
@@ -227,6 +245,25 @@ type CurrentQuery struct {
   IsOffsetSet   bool
 }
 */
+```
+
+## Deprecated
+
+### Group By time
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  GroupBy("10m").
+  Build()
+```
+
+Output:
+
+```sql
+SELECT "temperature","humidity" FROM "measurement" GROUP BY time(10m)
 ```
 
 ## License
