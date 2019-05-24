@@ -7,6 +7,98 @@ import (
 	"strings"
 )
 
+// Duration Duration interface
+type Duration interface {
+	Nanoseconds(uint) Duration
+	Microseconds(uint) Duration
+	Milliseconds(uint) Duration
+	Second(uint) Duration
+	Minute(uint) Duration
+	Hour(uint) Duration
+	Day(uint) Duration
+	Week(uint) Duration
+	getDuration() string
+}
+
+// DurationType DurationType struct
+type DurationType struct {
+	unit  string
+	value uint
+}
+
+// NewDuration New Duration
+func NewDuration() Duration {
+	return &DurationType{}
+}
+
+// Nanoseconds Nanoseconds
+func (t *DurationType) Nanoseconds(d uint) Duration {
+	t.unit = "ns"
+	t.value = d
+
+	return t
+}
+
+// Microseconds Microseconds
+func (t *DurationType) Microseconds(d uint) Duration {
+	t.unit = "u"
+	t.value = d
+
+	return t
+}
+
+// Milliseconds Milliseconds
+func (t *DurationType) Milliseconds(d uint) Duration {
+	t.unit = "ms"
+	t.value = d
+
+	return t
+}
+
+// Second Second
+func (t *DurationType) Second(d uint) Duration {
+	t.unit = "s"
+	t.value = d
+
+	return t
+}
+
+// Minute Minute
+func (t *DurationType) Minute(d uint) Duration {
+	t.unit = "m"
+	t.value = d
+
+	return t
+}
+
+// Hour Hour
+func (t *DurationType) Hour(d uint) Duration {
+	t.unit = "h"
+	t.value = d
+
+	return t
+}
+
+// Day Day
+func (t *DurationType) Day(d uint) Duration {
+	t.unit = "d"
+	t.value = d
+
+	return t
+}
+
+// Week Week
+func (t *DurationType) Week(d uint) Duration {
+	t.unit = "w"
+	t.value = d
+
+	return t
+}
+
+func (t *DurationType) getDuration() string {
+	return fmt.Sprintf("time(%d%s)", t.value, t.unit)
+}
+
 // QueryBuilder QueryBuilder interface
 type QueryBuilder interface {
 	Select(fields ...string) QueryBuilder
@@ -18,6 +110,8 @@ type QueryBuilder interface {
 	AndBrackets(QueryBuilder) QueryBuilder
 	OrBrackets(QueryBuilder) QueryBuilder
 	GroupBy(string) QueryBuilder
+	GroupByTime(Duration) QueryBuilder
+	GroupByTag(string) QueryBuilder
 	Fill(interface{}) QueryBuilder
 	Limit(uint) QueryBuilder
 	Offset(uint) QueryBuilder
@@ -46,6 +140,8 @@ type Query struct {
 	andBrackets   []QueryBuilder
 	orBrackets    []QueryBuilder
 	groupBy       string
+	groupByTime   string
+	groupByTag    string
 	order         string
 	limit         uint
 	_limit        bool
@@ -133,6 +229,18 @@ func (q *Query) OrBrackets(builder QueryBuilder) QueryBuilder {
 // GroupBy GROUP BY time
 func (q *Query) GroupBy(time string) QueryBuilder {
 	q.groupBy = time
+	return q
+}
+
+// GroupByTime GROUP BY time
+func (q *Query) GroupByTime(duration Duration) QueryBuilder {
+	q.groupByTime = duration.getDuration()
+	return q
+}
+
+// GroupByTag GROUP By tag
+func (q *Query) GroupByTag(tag string) QueryBuilder {
+	q.groupByTag = tag
 	return q
 }
 
@@ -301,6 +409,18 @@ func (q *Query) buildGroupBy() string {
 	if q.groupBy != "" {
 		buffer.WriteString(
 			fmt.Sprintf("GROUP BY time(%s)", q.groupBy),
+		)
+
+		buffer.WriteString(" ")
+	} else if q.groupByTime != "" {
+		buffer.WriteString(
+			fmt.Sprintf("GROUP BY %s", q.groupByTime),
+		)
+
+		buffer.WriteString(" ")
+	} else if q.groupByTag != "" {
+		buffer.WriteString(
+			fmt.Sprintf("GROUP BY %s", q.groupByTag),
 		)
 
 		buffer.WriteString(" ")

@@ -141,10 +141,11 @@ SELECT temperature,humidity FROM "measurement" WHERE "time" > '2018-11-01T06:33:
 
 ```go
 builder := New()
+duration := NewDuration()
 query := builder.
   Select("temperature", "humidity").
   From("measurement").
-  GroupBy("10m").
+  GroupByTime(duration.Minute(10)).
   Build()
 ```
 
@@ -152,6 +153,24 @@ Output:
 
 ```sql
 SELECT temperature,humidity FROM "measurement" GROUP BY time(10m)
+```
+
+### Group By Tag
+
+```go
+builder := New()
+duration := NewDuration()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  GroupByTag("sensorId").
+  Build()
+```
+
+Output:
+
+```sql
+SELECT temperature,humidity FROM "measurement" GROUP BY sensorId
 ```
 
 ### Order By time
@@ -227,6 +246,25 @@ type CurrentQuery struct {
   IsOffsetSet   bool
 }
 */
+```
+
+## Deprecated
+
+### [Deprecated] Group By time
+
+```go
+builder := New()
+query := builder.
+  Select("temperature", "humidity").
+  From("measurement").
+  GroupBy("10m").
+  Build()
+```
+
+Output:
+
+```sql
+SELECT temperature,humidity FROM "measurement" GROUP BY time(10m)
 ```
 
 ## License
