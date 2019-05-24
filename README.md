@@ -137,7 +137,7 @@ Output:
 SELECT temperature,humidity FROM "measurement" WHERE "time" > '2018-11-01T06:33:57.503Z' OR ("time" < '2018-11-02T09:35:25Z' OR "tag" = 't')
 ```
 
-### Group By time
+### Group By time duration
 
 ```go
 builder := New()
@@ -248,9 +248,9 @@ type CurrentQuery struct {
 */
 ```
 
-## Deprecated
+## Deprecated API
 
-### [Deprecated] Group By time
+### Group By time
 
 ```go
 builder := New()
