@@ -328,6 +328,10 @@ func (q *Query) buildFields() string {
 		selectField := strings.TrimSpace(splitByAs[0])
 		selectAs := ""
 
+		if selectField == "*" {
+			return "SELECT * "
+		}
+
 		if len(splitByAs) == 2 {
 			selectAs = strings.TrimSpace(splitByAs[1])
 		}
