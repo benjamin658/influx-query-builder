@@ -324,10 +324,22 @@ func (q *Query) buildFields() string {
 	fields := make([]string, len(q.fields))
 
 	for i := range fields {
-		if functionMatcher.MatchString(q.fields[i]) {
-			fields[i] = q.fields[i]
+		splitByAs := strings.Split(q.fields[i], "AS")
+		selectField := strings.TrimSpace(splitByAs[0])
+		selectAs := ""
+
+		if len(splitByAs) == 2 {
+			selectAs = strings.TrimSpace(splitByAs[1])
+		}
+
+		if functionMatcher.MatchString(selectField) {
+			fields[i] = selectField
 		} else {
-			fields[i] = fmt.Sprintf("\"%s\"", q.fields[i])
+			fields[i] = fmt.Sprintf("\"%s\"", selectField)
+		}
+
+		if selectAs != "" {
+			fields[i] = fields[i] + " AS " + fmt.Sprintf("\"%s\"", selectAs)
 		}
 	}
 

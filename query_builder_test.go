@@ -35,6 +35,17 @@ func TestSelect(t *testing.T) {
 	assert(t, q, expected)
 }
 
+func TestSelectAs(t *testing.T) {
+	expected := `SELECT "temperature" AS "temp","humidity" AS "hum" FROM "measurement"`
+	builder := New()
+	q := builder.
+		Select("temperature AS temp", "humidity AS hum").
+		From("measurement").
+		Build()
+
+	assert(t, q, expected)
+}
+
 func TestSelectFieldWithSpecialCharacter(t *testing.T) {
 	expected := `SELECT "temperature-with-hyphen" FROM "measurement"`
 	builder := New()
@@ -50,6 +61,17 @@ func TestSelectFunction(t *testing.T) {
 	builder := New()
 	q := builder.
 		Select(`MEAN("temperature")`, `SUM("humidity")`).
+		From("measurement").
+		Build()
+
+	assert(t, q, expected)
+}
+
+func TestSelectFunctionAs(t *testing.T) {
+	expected := `SELECT MEAN("temperature") AS "mt",SUM("humidity") AS "sh" FROM "measurement"`
+	builder := New()
+	q := builder.
+		Select(`MEAN("temperature") AS mt`, `SUM("humidity") AS sh`).
 		From("measurement").
 		Build()
 
