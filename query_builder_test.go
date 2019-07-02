@@ -46,6 +46,17 @@ func TestSelectAs(t *testing.T) {
 	assert(t, q, expected)
 }
 
+func TestSelectAll(t *testing.T) {
+	expected := `SELECT * FROM "measurement"`
+	builder := New()
+	q := builder.
+		Select("*").
+		From("measurement").
+		Build()
+
+	assert(t, q, expected)
+}
+
 func TestSelectFieldWithSpecialCharacter(t *testing.T) {
 	expected := `SELECT "temperature-with-hyphen" FROM "measurement"`
 	builder := New()
