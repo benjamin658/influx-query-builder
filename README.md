@@ -29,6 +29,22 @@ Output:
 SELECT "temperature","humidity" FROM "measurement"
 ```
 
+### Select AS
+
+```go
+builder := New()
+query := builder.
+  Select("temperature AS temp", "humidity AS hum").
+  From("measurement).
+  Build()
+```
+
+Output:
+
+```sql
+SELECT "temperature" AS "temp","humidity" AS "hum" FROM "measurement"
+```
+
 ### Function query
 
 ```go
@@ -43,6 +59,22 @@ Output:
 
 ```sql
 SELECT MEAN("temperature"),SUM("humidity") FROM "measurement"
+```
+
+### Function AS
+
+```go
+builder := New()
+query := builder.
+  Select(`MEAN("temperature") AS mt`, `SUM("humidity") AS sh`).
+  From("measurement").
+  Build()
+```
+
+Output:
+
+```sql
+SELECT MEAN("temperature") AS "mt",SUM("humidity") AS "sh" FROM "measurement"
 ```
 
 ### Query with criteria
