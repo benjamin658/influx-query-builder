@@ -317,7 +317,7 @@ func (q *Query) Build() string {
 }
 
 var functionMatcher = regexp.MustCompile(`.+\(.+\)$`)
-var mathMatcher = regexp.MustCompile(`^(.+?)([+\-\/*])(\s+)?(\d+)(\.\d+)?$`)
+var mathMatcher = regexp.MustCompile(`^(.+?)(([+\-\/*])(\s+)?(\d+)(\.\d+)?)+$`)
 
 func (q *Query) buildFields() string {
 	if q.fields == nil {
