@@ -103,6 +103,7 @@ func (t *DurationType) getDuration() string {
 type QueryBuilder interface {
 	Select(fields ...string) QueryBuilder
 	From(string) QueryBuilder
+	FromRP(string, string) QueryBuilder
 	Where(string, string, interface{}) QueryBuilder
 	And(string, string, interface{}) QueryBuilder
 	Or(string, string, interface{}) QueryBuilder
@@ -148,6 +149,8 @@ type Query struct {
 	offset        uint
 	_offset       bool
 	fill          interface{}
+
+	retentionPolicy string
 }
 
 // CurrentQuery Get current query
@@ -183,6 +186,13 @@ func (q *Query) Clean() QueryBuilder {
 // Select Select fields...
 func (q *Query) Select(fields ...string) QueryBuilder {
 	q.fields = append(q.fields, fields...)
+	return q
+}
+
+// FromRP retention policy qualified measurement
+func (q *Query) FromRP(retentionPolicy, measurement string) QueryBuilder {
+	q.retentionPolicy = retentionPolicy
+	q.measurement = measurement
 	return q
 }
 
@@ -354,8 +364,14 @@ func (q *Query) buildFrom() string {
 	if q.measurement == "" {
 		return ""
 	}
+	name := ""
+	if q.retentionPolicy != "" {
+		name = fmt.Sprintf(`%s."%s"`, q.retentionPolicy, q.measurement)
+	} else {
+		name = fmt.Sprintf(`"%s"`, q.measurement)
+	}
 
-	return fmt.Sprintf(`FROM "%s" `, q.measurement)
+	return fmt.Sprintf(`FROM %s `, name)
 }
 
 func (q *Query) buildWhere() string {

@@ -89,6 +89,17 @@ func TestSelectFunctionAs(t *testing.T) {
 	assert(t, q, expected)
 }
 
+func TestFrom(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM rp_1h."measurement"`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		FromRP("rp_1h", "measurement").
+		Build()
+
+	assert(t, q, expected)
+}
+
 func TestWhere(t *testing.T) {
 	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" < '2018-11-02T09:35:25Z'`
 	builder := New()
