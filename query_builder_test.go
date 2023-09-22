@@ -279,6 +279,36 @@ func TestGroupByTag(t *testing.T) {
 	assert(t, q, expected)
 }
 
+func TestGroupByTags(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY sensorId,location`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTag("sensorId", "location").
+		Build()
+
+	assert(t, q, expected)
+
+	q = New().
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTag("sensorId").
+		GroupByTag("location").
+		Build()
+
+	assert(t, q, expected)
+
+	q = New().
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(NewDuration().Minute(5)).
+		GroupByTag("sensorId", "location").
+		Build()
+	assert(t, q,
+		`SELECT "temperature","humidity" FROM "measurement" GROUP BY time(5m),sensorId,location`)
+}
+
 func TestFill(t *testing.T) {
 	expected := `SELECT "temperature","humidity" FROM "measurement" FILL(1)`
 	builder := New()
