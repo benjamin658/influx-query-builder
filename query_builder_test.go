@@ -89,6 +89,17 @@ func TestSelectFunctionAs(t *testing.T) {
 	assert(t, q, expected)
 }
 
+func TestFrom(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM rp_1h."measurement"`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		FromRP("rp_1h", "measurement").
+		Build()
+
+	assert(t, q, expected)
+}
+
 func TestWhere(t *testing.T) {
 	expected := `SELECT "temperature","humidity" FROM "measurement" WHERE "time" < '2018-11-02T09:35:25Z'`
 	builder := New()
@@ -266,6 +277,36 @@ func TestGroupByTag(t *testing.T) {
 		Build()
 
 	assert(t, q, expected)
+}
+
+func TestGroupByTags(t *testing.T) {
+	expected := `SELECT "temperature","humidity" FROM "measurement" GROUP BY sensorId,location`
+	builder := New()
+	q := builder.
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTag("sensorId", "location").
+		Build()
+
+	assert(t, q, expected)
+
+	q = New().
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTag("sensorId").
+		GroupByTag("location").
+		Build()
+
+	assert(t, q, expected)
+
+	q = New().
+		Select("temperature", "humidity").
+		From("measurement").
+		GroupByTime(NewDuration().Minute(5)).
+		GroupByTag("sensorId", "location").
+		Build()
+	assert(t, q,
+		`SELECT "temperature","humidity" FROM "measurement" GROUP BY time(5m),sensorId,location`)
 }
 
 func TestFill(t *testing.T) {

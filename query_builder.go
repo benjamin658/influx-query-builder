@@ -103,15 +103,17 @@ func (t *DurationType) getDuration() string {
 type QueryBuilder interface {
 	Select(fields ...string) QueryBuilder
 	From(string) QueryBuilder
+	FromRP(string, string) QueryBuilder
 	Where(string, string, interface{}) QueryBuilder
 	And(string, string, interface{}) QueryBuilder
 	Or(string, string, interface{}) QueryBuilder
 	WhereBrackets(QueryBuilder) QueryBuilder
 	AndBrackets(QueryBuilder) QueryBuilder
 	OrBrackets(QueryBuilder) QueryBuilder
+	// Deprecated: Use GroupByTime instead
 	GroupBy(string) QueryBuilder
 	GroupByTime(Duration) QueryBuilder
-	GroupByTag(string) QueryBuilder
+	GroupByTag(...string) QueryBuilder
 	Fill(interface{}) QueryBuilder
 	Limit(uint) QueryBuilder
 	Offset(uint) QueryBuilder
@@ -139,15 +141,16 @@ type Query struct {
 	whereBrackets QueryBuilder
 	andBrackets   []QueryBuilder
 	orBrackets    []QueryBuilder
-	groupBy       string
 	groupByTime   string
-	groupByTag    string
+	groupByTags   []string
 	order         string
 	limit         uint
 	_limit        bool
 	offset        uint
 	_offset       bool
 	fill          interface{}
+
+	retentionPolicy string
 }
 
 // CurrentQuery Get current query
@@ -183,6 +186,13 @@ func (q *Query) Clean() QueryBuilder {
 // Select Select fields...
 func (q *Query) Select(fields ...string) QueryBuilder {
 	q.fields = append(q.fields, fields...)
+	return q
+}
+
+// FromRP retention policy qualified measurement
+func (q *Query) FromRP(retentionPolicy, measurement string) QueryBuilder {
+	q.retentionPolicy = retentionPolicy
+	q.measurement = measurement
 	return q
 }
 
@@ -228,9 +238,10 @@ func (q *Query) OrBrackets(builder QueryBuilder) QueryBuilder {
 	return q
 }
 
-// GroupBy GROUP BY time
+// GroupBy GROUP BY time interval, e.g. 5m
+// Deprecated: Use GroupByTime instead
 func (q *Query) GroupBy(time string) QueryBuilder {
-	q.groupBy = time
+	q.groupByTime = fmt.Sprintf("time(%s)", time)
 	return q
 }
 
@@ -241,8 +252,8 @@ func (q *Query) GroupByTime(duration Duration) QueryBuilder {
 }
 
 // GroupByTag GROUP By tag
-func (q *Query) GroupByTag(tag string) QueryBuilder {
-	q.groupByTag = tag
+func (q *Query) GroupByTag(tags ...string) QueryBuilder {
+	q.groupByTags = append(q.groupByTags, tags...)
 	return q
 }
 
@@ -289,7 +300,7 @@ func (q *Query) GetQueryStruct() CurrentQuery {
 		AndBrackets:   q.andBrackets,
 		OrBrackets:    q.orBrackets,
 		Fields:        q.fields,
-		GroupBy:       q.groupBy,
+		GroupBy:       q.groupByTime,
 		Limit:         q.limit,
 		Offset:        q.offset,
 		Order:         q.order,
@@ -354,8 +365,14 @@ func (q *Query) buildFrom() string {
 	if q.measurement == "" {
 		return ""
 	}
+	name := ""
+	if q.retentionPolicy != "" {
+		name = fmt.Sprintf(`%s."%s"`, q.retentionPolicy, q.measurement)
+	} else {
+		name = fmt.Sprintf(`"%s"`, q.measurement)
+	}
 
-	return fmt.Sprintf(`FROM "%s" `, q.measurement)
+	return fmt.Sprintf(`FROM %s `, name)
 }
 
 func (q *Query) buildWhere() string {
@@ -421,29 +438,22 @@ func (q *Query) buildWhere() string {
 }
 
 func (q *Query) buildGroupBy() string {
-	var buffer bytes.Buffer
-
-	if q.groupBy != "" {
-		buffer.WriteString(
-			fmt.Sprintf("GROUP BY time(%s)", q.groupBy),
-		)
-
-		buffer.WriteString(" ")
-	} else if q.groupByTime != "" {
-		buffer.WriteString(
-			fmt.Sprintf("GROUP BY %s", q.groupByTime),
-		)
-
-		buffer.WriteString(" ")
-	} else if q.groupByTag != "" {
-		buffer.WriteString(
-			fmt.Sprintf("GROUP BY %s", q.groupByTag),
-		)
-
-		buffer.WriteString(" ")
+	if q.groupByTime == "" && len(q.groupByTags) == 0 {
+		return ""
 	}
-
-	return buffer.String()
+	var buffer bytes.Buffer
+	if q.groupByTime != "" {
+		buffer.WriteString(q.groupByTime)
+	}
+	if len(q.groupByTags) > 0 {
+		if buffer.Len() > 0 {
+			buffer.WriteString(",")
+			buffer.WriteString(strings.Join(q.groupByTags, ","))
+		} else {
+			buffer.WriteString(strings.Join(q.groupByTags, ","))
+		}
+	}
+	return fmt.Sprintf("GROUP BY %s ", buffer.String())
 }
 
 func (q *Query) buildFill() string {
